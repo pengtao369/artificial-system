@@ -498,6 +498,11 @@ select {
   gap: 14px;
 }
 
+.kpi-grid.compact {
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  margin-bottom: 18px;
+}
+
 .kpi-card,
 .panel {
   background: var(--surface);
@@ -807,6 +812,24 @@ tr:last-child td {
   color: var(--muted);
 }
 
+.chart-frame {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 10px;
+  align-items: stretch;
+}
+
+.chart-axis {
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: right;
+}
+
 .mini-chart {
   height: 180px;
   display: flex;
@@ -818,10 +841,24 @@ tr:last-child td {
 }
 
 .mini-chart span {
+  position: relative;
   flex: 1;
   min-width: 18px;
   border-radius: 7px 7px 0 0;
   background: linear-gradient(180deg, #22a699, #146b63);
+}
+
+.mini-chart.labelled {
+  padding-bottom: 34px;
+}
+
+.mini-chart span b {
+  position: absolute;
+  left: 50%;
+  bottom: -24px;
+  transform: translateX(-50%);
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .timeline,
@@ -950,6 +987,68 @@ tr:last-child td {
   font-size: 13px;
 }
 
+.inline-note,
+.confirm-copy {
+  margin: 0 0 14px;
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 13px;
+}
+
+.confirm-copy {
+  color: var(--text);
+}
+
+.rule-list {
+  display: grid;
+  gap: 10px;
+}
+
+.rule-card {
+  display: grid;
+  gap: 7px;
+  min-height: 78px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdfd;
+}
+
+.rule-card span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.leaderboard {
+  display: grid;
+  gap: 2px;
+}
+
+.health-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(190px, 1fr));
+  gap: 12px;
+}
+
+.health-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdfd;
+}
+
+.compact-detail {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.compact-detail div {
+  min-height: 58px;
+  padding: 10px;
+}
+
 .architecture {
   flex-direction: column;
 }
@@ -973,7 +1072,8 @@ tr:last-child td {
   grid-template-columns: repeat(4, minmax(160px, 1fr));
 }
 
-.service-grid span {
+.service-grid span,
+.service-grid button {
   min-height: 42px;
   display: grid;
   place-items: center;
@@ -982,6 +1082,11 @@ tr:last-child td {
   background: #f8fbfb;
   font-weight: 700;
   color: #314951;
+}
+
+.service-grid button:hover {
+  border-color: rgba(20,107,99,0.45);
+  background: #eef8f7;
 }
 
 .toast-message {

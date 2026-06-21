@@ -48,8 +48,17 @@
     </div>
     <div class="panel">
       <SectionHeader eyebrow="Performance" title="绩效趋势摘要" />
-      <div class="mini-chart">
-        <span style="height:42%"></span><span style="height:63%"></span><span style="height:58%"></span><span style="height:72%"></span><span style="height:86%"></span><span style="height:78%"></span><span style="height:91%"></span>
+      <div class="chart-frame">
+        <div class="chart-axis">
+          <span>100%</span>
+          <span>75%</span>
+          <span>50%</span>
+        </div>
+        <div class="mini-chart labelled">
+          <span v-for="item in performanceTrend" :key="item.label" :style="{ height: `${item.value}%` }">
+            <b>{{ item.label }}</b>
+          </span>
+        </div>
       </div>
     </div>
   </section>
@@ -67,9 +76,25 @@
     </div>
     <template #footer>
       <button class="secondary-btn" @click="notify(`已向 ${selected.name} 的主管发送资质提醒`)">发送资质提醒</button>
-      <button class="primary-btn" @click="toggleStatus(selected)">
+      <button class="primary-btn" @click="requestStatusChange(selected)">
         {{ selected.status === '停用' ? '恢复在岗' : '停用操作员' }}
       </button>
+    </template>
+  </AppModal>
+
+  <AppModal :open="Boolean(pendingStatusOperator)" eyebrow="Workforce Control" title="确认停用操作员" @close="pendingStatusOperator = null">
+    <p v-if="pendingStatusOperator" class="confirm-copy">
+      停用 {{ pendingStatusOperator.name }} 前，将触发全量同步校验、绑定设备解绑、银行账户归档和审计日志留存。
+    </p>
+    <div v-if="pendingStatusOperator" class="detail-grid">
+      <div><span>操作员</span><strong>{{ pendingStatusOperator.code }}</strong></div>
+      <div><span>绑定设备</span><strong>{{ pendingStatusOperator.device }}</strong></div>
+      <div><span>当前状态</span><strong>{{ pendingStatusOperator.status }}</strong></div>
+      <div><span>前置动作</span><strong>同步 + 解绑 + 归档</strong></div>
+    </div>
+    <template #footer>
+      <button class="secondary-btn" @click="pendingStatusOperator = null">取消</button>
+      <button class="primary-btn" @click="confirmStatusChange">确认停用</button>
     </template>
   </AppModal>
 </template>
@@ -87,7 +112,17 @@ const rows = ref(operatorSeed.map((item) => ({ ...item })))
 const keyword = ref('')
 const region = ref('全部区域')
 const selected = ref(null)
+const pendingStatusOperator = ref(null)
 const toast = reactive({ message: '', tone: 'success' })
+const performanceTrend = [
+  { label: 'W1', value: 42 },
+  { label: 'W2', value: 63 },
+  { label: 'W3', value: 58 },
+  { label: 'W4', value: 72 },
+  { label: 'W5', value: 86 },
+  { label: 'W6', value: 78 },
+  { label: 'W7', value: 91 }
+]
 
 const regions = computed(() => [...new Set(rows.value.map((item) => item.region))])
 const filteredOperators = computed(() => {
@@ -130,9 +165,24 @@ function addOperator() {
   notify('已创建待入职操作员，可在详情中继续维护')
 }
 
+function requestStatusChange(op) {
+  if (op.status !== '停用') {
+    pendingStatusOperator.value = op
+    return
+  }
+  toggleStatus(op)
+}
+
+function confirmStatusChange() {
+  if (!pendingStatusOperator.value) return
+  toggleStatus(pendingStatusOperator.value)
+  pendingStatusOperator.value = null
+}
+
 function toggleStatus(op) {
   op.status = op.status === '停用' ? '在岗' : '停用'
-  notify(`${op.name} 已${op.status === '停用' ? '停用' : '恢复在岗'}`)
+  const suffix = op.status === '停用' ? '停用，同步/解绑/归档任务已排队' : '恢复在岗'
+  notify(`${op.name} 已${suffix}`)
 }
 
 function exportList() {

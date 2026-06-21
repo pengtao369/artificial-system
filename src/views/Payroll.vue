@@ -28,11 +28,42 @@
 
   <section class="panel">
     <SectionHeader eyebrow="Approval Workflow" title="审批链路" />
+    <p class="inline-note">Demo 模式：月结按钮模拟生成批次；生产环境需调用 incentive-service 加载规则版本、拉取绩效聚合并执行可追溯计算。</p>
     <div class="approval-flow">
       <div><strong>主管</strong><span>团队明细初审</span></div>
       <div><strong>区域经理</strong><span>区域汇总复审</span></div>
       <div><strong>财务审批</strong><span>预算与支付准备</span></div>
       <div><strong>CEO/CFO</strong><span>ETB 500,000+ 大额终审</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <SectionHeader eyebrow="F011 Incentive Rules" title="激励规则编辑器">
+      <div class="toolbar">
+        <select v-model="ruleStatus">
+          <option>全部规则</option>
+          <option>已启用</option>
+          <option>草稿</option>
+        </select>
+        <button class="secondary-btn" @click="cloneRule"><CopyPlus :size="16" />复制版本</button>
+        <button class="primary-btn" @click="activateRule"><CheckCircle2 :size="16" />启用规则</button>
+      </div>
+    </SectionHeader>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>规则ID</th><th>名称</th><th>版本</th><th>条件</th><th>公式</th><th>状态</th><th>影响</th></tr></thead>
+        <tbody>
+          <tr v-for="rule in filteredRules" :key="rule.id" :class="['clickable-row', { selected: selectedRule?.id === rule.id }]" @click="selectedRule = rule">
+            <td><strong>{{ rule.id }}</strong></td>
+            <td>{{ rule.name }}</td>
+            <td>{{ rule.version }}</td>
+            <td>{{ rule.condition }}</td>
+            <td>{{ rule.formula }}</td>
+            <td><StatusBadge :label="rule.status" /></td>
+            <td>{{ rule.impact }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </section>
 
@@ -60,18 +91,22 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
-import { Calculator, CheckCircle2 } from 'lucide-vue-next'
+import { computed, reactive, ref } from 'vue'
+import { Calculator, CheckCircle2, CopyPlus } from 'lucide-vue-next'
 import AppModal from '../components/AppModal.vue'
 import SectionHeader from '../components/SectionHeader.vue'
 import StatusBadge from '../components/StatusBadge.vue'
 import ToastMessage from '../components/ToastMessage.vue'
-import { payrollBatches } from '../data/mock'
+import { incentiveRules, payrollBatches } from '../data/mock'
 
 const batches = ref(payrollBatches.map((item) => ({ ...item })))
+const rules = ref(incentiveRules.map((item) => ({ ...item })))
 const selected = ref(null)
+const selectedRule = ref(rules.value[0])
+const ruleStatus = ref('全部规则')
 const comment = ref('')
 const toast = reactive({ message: '', tone: 'success' })
+const filteredRules = computed(() => rules.value.filter((rule) => ruleStatus.value === '全部规则' || rule.status === ruleStatus.value))
 
 function notify(message, tone = 'success') {
   toast.message = message
@@ -112,6 +147,7 @@ function approveAll() {
 }
 
 function calculatePayroll() {
+  // Demo: production closing should call incentive-service for versioned rule calculation.
   const no = `BAT-20260617-000${140 + batches.value.length}`
   batches.value.unshift({
     no,
@@ -124,5 +160,30 @@ function calculatePayroll() {
     status: '待审批'
   })
   notify(`${no} 已生成并进入审批流`)
+}
+
+function cloneRule() {
+  if (!selectedRule.value) {
+    notify('请先选择一条激励规则', 'danger')
+    return
+  }
+  const item = {
+    ...selectedRule.value,
+    id: `${selectedRule.value.id}-DRAFT`,
+    version: 'v2026.07-draft',
+    status: '草稿'
+  }
+  rules.value.unshift(item)
+  selectedRule.value = item
+  notify(`${item.name} 已复制为新草稿`, 'info')
+}
+
+function activateRule() {
+  if (!selectedRule.value) {
+    notify('请先选择一条激励规则', 'danger')
+    return
+  }
+  selectedRule.value.status = '已启用'
+  notify(`${selectedRule.value.name} 已启用，后续月结将使用该规则版本`)
 }
 </script>

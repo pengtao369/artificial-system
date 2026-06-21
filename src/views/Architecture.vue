@@ -28,12 +28,28 @@
   <section class="panel">
     <SectionHeader eyebrow="Microservices" title="核心服务分组" />
     <div class="service-grid">
-      <span>auth-service</span><span>operator-service</span><span>kit-service</span><span>enrollment-service</span><span>sync-service</span><span>incentive-service</span><span>workflow-service</span><span>payment-service</span><span>fraud-service</span><span>audit-service</span><span>geospatial-service</span><span>notification-service</span>
+      <button v-for="service in serviceCatalog" :key="service.name" type="button" @click="selectedService = service">
+        {{ service.name }}
+      </button>
     </div>
   </section>
+
+  <AppModal :open="Boolean(selectedService)" eyebrow="Service Detail" :title="selectedService?.name || ''" @close="selectedService = null">
+    <div v-if="selectedService" class="detail-grid">
+      <div><span>Owner</span><strong>{{ selectedService.owner }}</strong></div>
+      <div><span>SLA</span><strong>{{ selectedService.sla }}</strong></div>
+      <div><span>API</span><strong>{{ selectedService.api }}</strong></div>
+      <div><span>职责</span><strong>{{ selectedService.note }}</strong></div>
+    </div>
+  </AppModal>
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { CloudCog, Server, Smartphone } from 'lucide-vue-next'
+import AppModal from '../components/AppModal.vue'
 import SectionHeader from '../components/SectionHeader.vue'
+import { serviceCatalog } from '../data/mock'
+
+const selectedService = ref(null)
 </script>

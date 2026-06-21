@@ -76,9 +76,12 @@ import {
   Fingerprint,
   LayoutDashboard,
   Network,
+  RadioTower,
+  ScrollText,
   RefreshCcw,
   ShieldCheck,
   Smartphone,
+  Store,
   Users
 } from 'lucide-vue-next'
 import ToastMessage from './components/ToastMessage.vue'
@@ -100,8 +103,11 @@ const navItems = [
   { path: '/devices', label: '设备管理', icon: Smartphone },
   { path: '/sync', label: '离线同步', icon: DatabaseZap },
   { path: '/enrollment', label: '登记质量', icon: Fingerprint },
+  { path: '/tasks', label: '任务市场', icon: Store },
   { path: '/payroll', label: '薪酬审批', icon: ClipboardCheck },
   { path: '/payments', label: '支付对账', icon: CreditCard },
+  { path: '/privacy', label: '数据治理', icon: ScrollText },
+  { path: '/ops', label: '运维发布', icon: RadioTower },
   { path: '/security', label: '安全审计', icon: ShieldCheck },
   { path: '/architecture', label: '系统架构', icon: Network }
 ]

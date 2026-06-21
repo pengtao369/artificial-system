@@ -11,7 +11,7 @@
           <option>已丢失</option>
         </select>
         <button class="secondary-btn" @click="mapMode = !mapMode"><Map :size="16" />{{ mapMode ? '列表视图' : '地图视图' }}</button>
-        <button class="primary-btn" :disabled="!selected" @click="lockSelected"><LockKeyhole :size="16" />远程锁定</button>
+        <button class="primary-btn" :disabled="!selected" @click="requestLockSelected"><LockKeyhole :size="16" />远程锁定</button>
       </div>
     </SectionHeader>
     <div v-if="mapMode" class="device-map">
@@ -73,7 +73,23 @@
     <template #footer>
       <button class="secondary-btn" @click="unbindSelected">解绑</button>
       <button class="secondary-btn" @click="wipeSelected">擦除数据</button>
-      <button class="primary-btn" @click="lockSelected">远程锁定</button>
+      <button class="primary-btn" @click="requestLockSelected">远程锁定</button>
+    </template>
+  </AppModal>
+
+  <AppModal :open="Boolean(pendingLockDevice)" eyebrow="Remote Command" title="确认远程锁定与擦除" @close="pendingLockDevice = null">
+    <p v-if="pendingLockDevice" class="confirm-copy">
+      将向 {{ pendingLockDevice.id }} 签发远程锁定指令，吊销设备证书，并把擦除命令加入下一次联网执行队列。
+    </p>
+    <div v-if="pendingLockDevice" class="detail-grid">
+      <div><span>设备</span><strong>{{ pendingLockDevice.id }}</strong></div>
+      <div><span>持有人</span><strong>{{ pendingLockDevice.holder }}</strong></div>
+      <div><span>最后在线</span><strong>{{ pendingLockDevice.lastOnline }}</strong></div>
+      <div><span>证书状态</span><strong>{{ pendingLockDevice.cert }}</strong></div>
+    </div>
+    <template #footer>
+      <button class="secondary-btn" @click="pendingLockDevice = null">取消</button>
+      <button class="primary-btn" @click="confirmLockSelected">签发指令</button>
     </template>
   </AppModal>
 </template>
@@ -90,6 +106,7 @@ import { devices as deviceSeed } from '../data/mock'
 
 const rows = ref(deviceSeed.map((item) => ({ ...item })))
 const selected = ref(null)
+const pendingLockDevice = ref(null)
 const statusFilter = ref('全部状态')
 const mapMode = ref(false)
 const toast = reactive({ message: '', tone: 'success' })
@@ -105,22 +122,37 @@ function notify(message, tone = 'success') {
   }, 2200)
 }
 
-function lockSelected() {
+function requestLockSelected() {
   if (!selected.value) {
     notify('请先选择一台设备', 'danger')
     return
   }
-  selected.value.status = '已丢失'
-  selected.value.cert = '已吊销'
-  notify(`${selected.value.id} 已签发远程锁定指令`)
+  pendingLockDevice.value = selected.value
+}
+
+function confirmLockSelected() {
+  if (!pendingLockDevice.value) return
+  pendingLockDevice.value.status = '已丢失'
+  pendingLockDevice.value.cert = '已吊销'
+  pendingLockDevice.value.storage = 0
+  notify(`${pendingLockDevice.value.id} 已签发锁定、证书吊销与远程擦除指令`)
+  pendingLockDevice.value = null
 }
 
 function wipeSelected() {
+  if (!selected.value) {
+    notify('请先选择一台设备', 'danger')
+    return
+  }
   selected.value.storage = 0
   notify(`${selected.value.id} 已加入远程擦除队列`, 'info')
 }
 
 function unbindSelected() {
+  if (!selected.value) {
+    notify('请先选择一台设备', 'danger')
+    return
+  }
   selected.value.holder = '仓库'
   selected.value.status = '可用'
   notify(`${selected.value.id} 已解绑并回收入库`)

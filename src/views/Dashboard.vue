@@ -6,7 +6,7 @@
 
     <section class="panel wide">
       <SectionHeader eyebrow="National Core" title="全国登记与同步态势">
-        <button class="primary-btn"><MapPinned :size="16" />区域调度</button>
+        <button class="primary-btn" @click="router.push('/tasks')"><MapPinned :size="16" />区域调度</button>
       </SectionHeader>
       <div class="dashboard-map">
         <div v-for="region in regions" :key="region.code" :class="['region-pin', region.risk]">
@@ -50,10 +50,13 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
 import { MapPinned } from 'lucide-vue-next'
 import KpiCard from '../components/KpiCard.vue'
 import ProgressBar from '../components/ProgressBar.vue'
 import SectionHeader from '../components/SectionHeader.vue'
 import StatusBadge from '../components/StatusBadge.vue'
 import { fraudEvents, kpis, regions } from '../data/mock'
+
+const router = useRouter()
 </script>

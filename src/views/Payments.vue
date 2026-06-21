@@ -93,6 +93,10 @@ function executeSelected() {
 }
 
 function executePayment(payment) {
+  if (!payment) {
+    notify('请先选择支付批次', 'danger')
+    return
+  }
   payment.status = 'PAYING'
   payment.ref = `${payment.bank.split(' ')[0].toUpperCase()}-PAY-${Math.floor(Math.random() * 900000 + 100000)}`
   payment.reconcile = 'T+1待对账'
@@ -100,12 +104,20 @@ function executePayment(payment) {
 }
 
 function retryPayment(payment) {
+  if (!payment) {
+    notify('请先选择支付批次', 'danger')
+    return
+  }
   payment.retry += 1
   payment.status = 'PAYING'
   notify(`${payment.no} 已发起第 ${payment.retry} 次重试`, 'info')
 }
 
 function markReconciled(payment) {
+  if (!payment) {
+    notify('请先选择支付批次', 'danger')
+    return
+  }
   payment.status = 'PAID'
   payment.reconcile = '匹配'
   notify(`${payment.no} 对账已匹配`)

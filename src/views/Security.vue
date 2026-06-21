@@ -4,14 +4,17 @@
     <div class="panel">
       <SectionHeader eyebrow="M08 Security" title="安全能力状态" />
       <div class="security-grid">
-        <div><ShieldCheck :size="22" /><strong>Keycloak OIDC</strong><span>MFA + 离线 JWT</span></div>
-        <div><KeyRound :size="22" /><strong>Vault KMS</strong><span>证书轮换 30天预警</span></div>
-        <div><Lock :size="22" /><strong>TLS 1.3 / mTLS</strong><span>APISIX + Istio</span></div>
-        <div><FileCheck2 :size="22" /><strong>Append-only Audit</strong><span>Kafka + ES + Hash Chain</span></div>
+        <div><ShieldCheck :size="22" /><strong>Keycloak OIDC</strong><StatusBadge label="在线" /><span>MFA + 离线 JWT · 2分钟前探活</span></div>
+        <div><KeyRound :size="22" /><strong>Vault KMS</strong><StatusBadge label="待轮换" /><span>主密钥 HSM 备份 · 12天后轮换</span></div>
+        <div><Lock :size="22" /><strong>TLS 1.3 / mTLS</strong><StatusBadge label="正常" /><span>APISIX + Istio · 证书链校验通过</span></div>
+        <div><FileCheck2 :size="22" /><strong>Append-only Audit</strong><StatusBadge label="在线" /><span>Kafka + ES + Hash Chain · 延迟 1.8s</span></div>
       </div>
     </div>
     <div class="panel">
-      <SectionHeader eyebrow="RBAC" title="角色访问矩阵" />
+      <SectionHeader eyebrow="RBAC" title="角色访问矩阵">
+        <StatusBadge label="只读视图" />
+      </SectionHeader>
+      <p class="inline-note">当前页面展示已生效权限快照；权限变更需由 IAM 工单审批后同步到 Keycloak。</p>
       <div class="task-row"><span>主管 / 区域经理</span><strong>绩效与审批</strong></div>
       <div class="task-row"><span>财务审批员</span><strong>支付与规则</strong></div>
       <div class="task-row"><span>系统管理员</span><strong>用户与设备</strong></div>

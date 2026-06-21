@@ -64,6 +64,8 @@
       <div><span>采集模态</span><strong>{{ selected.bio }}</strong></div>
       <div><span>同步状态</span><strong>{{ selected.synced }}</strong></div>
       <div><span>当前状态</span><strong>{{ selected.status }}</strong></div>
+      <div v-if="selected.status === '需人工复核'"><span>降级原因</span><strong>连续 3 次采集质量不达标</strong></div>
+      <div v-if="selected.score < 60"><span>绩效规则</span><strong>不计入绩效，需主管复核</strong></div>
     </div>
     <template #footer>
       <button class="secondary-btn" @click="markDuplicate(selected)">标记重复</button>
